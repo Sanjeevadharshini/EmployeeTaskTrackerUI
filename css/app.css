@@ -1,0 +1,48 @@
+html,
+body {
+    min-height: 100%;
+    margin: 0;
+}
+
+body {
+    overflow-x: hidden;
+}
+
+/* Common application layout */
+.app-layout {
+    min-height: 100vh;
+    display: flex;
+}
+
+/* Desktop sidebar */
+.app-sidebar {
+    width: 240px;
+    min-width: 240px;
+    min-height: 100vh;
+    background-color: #212529;
+}
+
+/* Main content */
+.app-main {
+    flex: 1;
+    min-width: 0;
+    min-height: 100vh;
+    background-color: #f8f9fa;
+}
+
+/* Common navbar */
+.app-navbar {
+    min-height: 70px;
+}
+
+/* Page content */
+.app-content {
+    padding: 24px;
+}
+
+/* Mobile */
+@media (max-width: 991.98px) {
+    .app-content {
+        padding: 16px;
+    }
+}

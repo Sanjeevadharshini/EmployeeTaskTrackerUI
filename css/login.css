@@ -1,0 +1,9 @@
+.login-page {
+    min-height: 100vh;
+    background: #f8f9fa;
+}
+
+.login-card {
+    width: 400px;
+    max-width: 95%;
+}

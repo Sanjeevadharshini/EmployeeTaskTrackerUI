@@ -1,0 +1,12 @@
+.password-toggle {
+    cursor: pointer;
+}
+
+.table td,
+.table th {
+    vertical-align: middle;
+}
+
+.cursor-pointer {
+    cursor: pointer;
+}
