@@ -1,5 +1,9 @@
 let editingEmployeeId = null;
 
+let currentEmployeePage = 1;
+
+let employeePageSize = 10;
+
 document.addEventListener("DOMContentLoaded", async () => {
 
     const ready =
@@ -22,6 +26,24 @@ document.addEventListener("DOMContentLoaded", async () => {
         }, 1000);
 
         return;
+    }
+
+    const pageSizeSelect =
+        document.getElementById("employeePageSize");
+
+    if (pageSizeSelect) {
+
+        employeePageSize =
+            Number(pageSizeSelect.value) || 10;
+
+        pageSizeSelect.addEventListener("change", () => {
+            employeePageSize =
+                Number(pageSizeSelect.value) || 10;
+
+            currentEmployeePage = 1;
+
+            loadEmployees();
+        });
     }
 
     await loadEmployees();
@@ -48,14 +70,37 @@ async function loadEmployees() {
 
     try {
 
+        const params =
+            new URLSearchParams({
+                pageNumber: currentEmployeePage,
+                pageSize: employeePageSize
+            });
+
         const result =
-            await apiRequest("/Employee");
+            await apiRequest(`/Employee?${params.toString()}`);
 
         const employees =
             result?.data ||
             [];
 
+        currentEmployeePage =
+            result?.pageNumber ||
+            currentEmployeePage;
+
+        if (!employees.length && currentEmployeePage > 1 && (result?.totalCount || 0) > 0) {
+            currentEmployeePage -= 1;
+            await loadEmployees();
+            return;
+        }
+
         if (!employees.length) {
+
+            renderPagination(
+                "employeePagination",
+                currentEmployeePage,
+                result?.totalPages || 0,
+                "goToEmployeePage"
+            );
 
             tbody.innerHTML = `
                 <tr>
@@ -70,7 +115,7 @@ async function loadEmployees() {
         }
 
         tbody.innerHTML =
-            employees.map(employee => {
+            employees.map((employee, index) => {
 
                 const id =
                     getValue(
@@ -78,6 +123,9 @@ async function loadEmployees() {
                         "userId",
                         "UserId"
                     );
+
+                const serialNo =
+                    (currentEmployeePage - 1) * employeePageSize + index + 1;
 
                 const name =
                     getValue(
@@ -110,7 +158,7 @@ async function loadEmployees() {
                 return `
                     <tr>
 
-                        <td>${id}</td>
+                        <td>${serialNo}</td>
 
                         <td>
                             ${escapeHtml(name)}
@@ -160,10 +208,28 @@ async function loadEmployees() {
 
             }).join("");
 
+        renderPagination(
+            "employeePagination",
+            currentEmployeePage,
+            result?.totalPages || 0,
+            "goToEmployeePage"
+        );
+
     } catch (error) {
 
         console.error(error);
     }
+}
+
+function goToEmployeePage(page) {
+
+    if (page < 1) {
+        return;
+    }
+
+    currentEmployeePage = page;
+
+    loadEmployees();
 }
 
 function openCreateEmployee() {

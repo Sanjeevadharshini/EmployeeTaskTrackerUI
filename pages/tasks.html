@@ -67,7 +67,7 @@
 
                             <div class="col-lg-5 col-md-6">
 
-                                <input id="search" class="form-control" placeholder="Search task">
+                                <input id="search" class="form-control" placeholder="Search task/assigned to...">
 
                             </div>
 
@@ -115,7 +115,7 @@
 
                                 <button id="filterButton" class="btn btn-primary w-100" title="Filter">
 
-                                    <i class="fa fa-filter"></i>
+                                    Search <i class="fa fa-filter"></i>
 
                                 </button>
 
@@ -149,7 +149,7 @@
 
                                 <tr>
 
-                                    <th>ID</th>
+                                    <th>S.No</th>
                                     <th>Title</th>
                                     <th>Assigned To</th>
                                     <th>Priority</th>
@@ -177,6 +177,34 @@
                             </tbody>
 
                         </table>
+
+                    </div>
+
+                    <div class="card-footer bg-white border-0 py-2">
+
+                        <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+
+                            <div class="d-flex align-items-center gap-2">
+
+                                <label for="taskPageSize" class="text-secondary small mb-0">
+                                    Show
+                                </label>
+
+                                <select id="taskPageSize" class="form-select form-select-sm w-auto">
+                                    <option value="10">10</option>
+                                    <option value="25">25</option>
+                                    <option value="50">50</option>
+                                </select>
+
+                                <span class="text-secondary small">
+                                    per page
+                                </span>
+
+                            </div>
+
+                            <div id="taskPagination"></div>
+
+                        </div>
 
                     </div>
 

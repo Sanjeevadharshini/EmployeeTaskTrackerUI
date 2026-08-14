@@ -320,6 +320,62 @@ function logout() {
     window.location.href = "login.html";
 }
 
+function renderPagination(containerId, pageNumber, totalPages, onPageChangeFnName) {
+
+    const container = document.getElementById(containerId);
+
+    if (!container) {
+        return;
+    }
+
+    if (!totalPages || totalPages <= 1) {
+        container.innerHTML = "";
+        return;
+    }
+
+    const maxButtons = 5;
+
+    let start = Math.max(1, pageNumber - Math.floor(maxButtons / 2));
+
+    let end = Math.min(totalPages, start + maxButtons - 1);
+
+    start = Math.max(1, end - maxButtons + 1);
+
+    let pagesHtml = "";
+
+    for (let page = start; page <= end; page++) {
+        pagesHtml += `
+            <li class="page-item ${page === pageNumber ? "active" : ""}">
+                <button type="button" class="page-link" onclick="${onPageChangeFnName}(${page})">
+                    ${page}
+                </button>
+            </li>
+        `;
+    }
+
+    container.innerHTML = `
+        <nav aria-label="Pagination">
+            <ul class="pagination pagination-sm justify-content-end mb-0">
+
+                <li class="page-item ${pageNumber <= 1 ? "disabled" : ""}">
+                    <button type="button" class="page-link" onclick="${onPageChangeFnName}(${pageNumber - 1})">
+                        <i class="fa fa-chevron-left"></i>
+                    </button>
+                </li>
+
+                ${pagesHtml}
+
+                <li class="page-item ${pageNumber >= totalPages ? "disabled" : ""}">
+                    <button type="button" class="page-link" onclick="${onPageChangeFnName}(${pageNumber + 1})">
+                        <i class="fa fa-chevron-right"></i>
+                    </button>
+                </li>
+
+            </ul>
+        </nav>
+    `;
+}
+
 function escapeHtml(value) {
 
     return String(value ?? "")

@@ -1,3 +1,7 @@
+let currentTaskPage = 1;
+
+let taskPageSize = 10;
+
 document.addEventListener("DOMContentLoaded", async () => {
   const ready = await setupCommonPage();
 
@@ -7,12 +11,27 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   applyUrlFilters();
 
+  const pageSizeSelect = document.getElementById("taskPageSize");
+
+  if (pageSizeSelect) {
+    taskPageSize = Number(pageSizeSelect.value) || 10;
+
+    pageSizeSelect.addEventListener("change", () => {
+      taskPageSize = Number(pageSizeSelect.value) || 10;
+      currentTaskPage = 1;
+      loadTasks();
+    });
+  }
+
   await loadEmployees();
   await loadTasks();
 
   document.getElementById("taskForm")?.addEventListener("submit", saveTask);
 
-  document.getElementById("filterButton")?.addEventListener("click", loadTasks);
+  document.getElementById("filterButton")?.addEventListener("click", () => {
+    currentTaskPage = 1;
+    loadTasks();
+  });
 
   document
     .getElementById("clearFilterButton")
@@ -51,6 +70,18 @@ function clearFilters() {
   document.getElementById("filterPriority").value = "";
 
   window.history.replaceState({}, document.title, "tasks.html");
+
+  currentTaskPage = 1;
+
+  loadTasks();
+}
+
+function goToTaskPage(page) {
+  if (page < 1) {
+    return;
+  }
+
+  currentTaskPage = page;
 
   loadTasks();
 }
@@ -113,16 +144,30 @@ async function loadTasks() {
       params.set("priority", priority);
     }
 
+    params.set("pageNumber", currentTaskPage);
+
+    params.set("pageSize", taskPageSize);
+
     const query = params.toString() ? `?${params.toString()}` : "";
 
     const result = await apiRequest(`/Tasks${query}`);
 
     const tasks = result?.data || [];
 
+    currentTaskPage = result?.pageNumber || currentTaskPage;
+
+    if (!tasks.length && currentTaskPage > 1 && (result?.totalCount || 0) > 0) {
+      currentTaskPage -= 1;
+      await loadTasks();
+      return;
+    }
+
     if (!tasks.length) {
+      renderPagination("taskPagination", currentTaskPage, result?.totalPages || 0, "goToTaskPage");
+
       tbody.innerHTML = `
                 <tr>
-                    <td colspan="7"
+                    <td colspan="8"
                         class="text-center text-secondary py-4">
 
                         No tasks found.
@@ -135,8 +180,10 @@ async function loadTasks() {
     }
 
     tbody.innerHTML = tasks
-      .map((task) => {
+      .map((task, index) => {
         const id = getValue(task, "taskId", "TaskId");
+
+        const serialNo = (currentTaskPage - 1) * taskPageSize + index + 1;
 
         const title = getValue(task, "title", "Title");
 
@@ -171,7 +218,7 @@ async function loadTasks() {
         return `
                     <tr>
 
-                        <td>${id}</td>
+                        <td>${serialNo}</td>
 
                         <td>
                             ${escapeHtml(title)}
@@ -252,6 +299,8 @@ async function loadTasks() {
                 `;
       })
       .join("");
+
+    renderPagination("taskPagination", currentTaskPage, result?.totalPages || 0, "goToTaskPage");
   } catch (error) {
     console.error(error);
   }
@@ -399,6 +448,10 @@ async function saveTask(event) {
     bootstrap.Modal.getOrCreateInstance(
       document.getElementById("taskModal"),
     ).hide();
+
+    if (!id) {
+      currentTaskPage = 1;
+    }
 
     await loadTasks();
   } catch (error) {
